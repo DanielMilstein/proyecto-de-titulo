@@ -1,0 +1,82 @@
+# Byte-compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment directories
+venv/
+env/
+.venv/
+.env/
+
+# Distribution/build files
+build/
+dist/
+*.egg-info/
+
+# Logs
+*.log
+*.out
+*.err
+error_log.txt
+
+# Environment variables
+.env
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# PyCharm/IDEA specific files
+.idea/
+*.iml
+
+# MacOS specific files
+.DS_Store
+
+# Windows specific files
+Thumbs.db
+
+# Test coverage reports
+htmlcov/
+*.cover
+.coverage
+.cache
+.nosetests.xml
+coverage.xml
+
+# MyPy cache
+.mypy_cache/
+
+# Pytest cache
+.pytest_cache/
+
+# Django specific
+*.sqlite3
+/media/
+/staticfiles/
+
+# Flask specific
+instance/
+*.pyc
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*.swo
+*.orig
+*.mp4
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+
+# PEP 582 support (__pypackages__)
+__pypackages__/
+
+# Other
+*.snap
+outputs/
+out/
+obico-server/
+imagenes/
+
