@@ -11,6 +11,8 @@ from src.services.detection_worker import DetectionConfig, DetectionWorker
 from src.services.ml_api_client import MlApiClient
 from src.services.interfaces import FrameSource, DetectionSource, DetectionClient
 from src.routes.cam_routes import create_cam_router
+from src.services.notifications.base import NotificationSender
+from src.services.notifications.policy import NotificationPolicy
 
 # We import FastAPI and helpers locally in create_app to avoid hard deps during unit tests
 
@@ -27,8 +29,10 @@ def create_detection_worker(
     camera_latest: Callable[[], Tuple[Optional[np.ndarray], float]],
     cfg: DetectionConfig,
     start: bool = True,
+    notifiers: Optional[list[NotificationSender]] = None,
+    policy: Optional[NotificationPolicy] = None,
 ) -> DetectionWorker:
-    det = DetectionWorker(client=client, camera_latest=camera_latest, config=cfg)
+    det = DetectionWorker(client=client, camera_latest=camera_latest, config=cfg, notifiers=notifiers, policy=policy)
     if start:
         det.start()
     return det

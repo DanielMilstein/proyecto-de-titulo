@@ -9,6 +9,8 @@ from src.services.camera_worker import CameraConfig
 from src.services.detection_worker import DetectionConfig
 from src.services.factories import create_camera_worker, create_detection_worker, create_app
 from src.services.ml_api_client import MlApiClient
+from src.services.notifications.factory import create_notifiers_from_config
+from src.services.notifications.policy import NotificationPolicy
 
 
 @dataclass
@@ -27,11 +29,23 @@ class Container:
             ),
             start=True,
         )
+        # Notifications (optional)
+        notifiers = create_notifiers_from_config(self.config)
+        policy = None
+        if self.config.notify_enabled and notifiers:
+            policy = NotificationPolicy(
+                score_threshold=self.config.notify_score_threshold,
+                frames_required=self.config.notify_frames_required,
+                cooldown_seconds=self.config.notify_cooldown_seconds,
+            )
+
         self.detector = create_detection_worker(
             client=self.client,
             camera_latest=self.camera.latest,
             cfg=DetectionConfig(public_base=self.config.public_base, interval=self.config.detect_interval),
             start=True,
+            notifiers=notifiers,
+            policy=policy,
         )
 
         self.app = create_app(client=self.client, frame_source=self.camera, detection_source=self.detector)

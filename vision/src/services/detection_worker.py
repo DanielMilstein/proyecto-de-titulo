@@ -16,6 +16,9 @@ import numpy as np
 from src.schemas.detection import Detection
 from src.services.ml_api_client import MlApiClient
 from src.utils.visualization import draw_detections
+from src.services.notifications.base import NotificationEvent, NotificationSender
+from src.services.notifications.policy import NotificationPolicy
+import cv2
 
 
 @dataclass(frozen=True)
@@ -25,7 +28,14 @@ class DetectionConfig:
 
 
 class DetectionWorker:
-    def __init__(self, client: MlApiClient, camera_latest, config: DetectionConfig):
+    def __init__(
+        self,
+        client: MlApiClient,
+        camera_latest,
+        config: DetectionConfig,
+        notifiers: Optional[List[NotificationSender]] = None,
+        policy: Optional[NotificationPolicy] = None,
+    ):
         """
         Args:
             client: MlApiClient used to call ml_api.
@@ -44,6 +54,8 @@ class DetectionWorker:
         self._last_dets: List[Detection] = []
         self._last_annotated: Optional[np.ndarray] = None
         self._last_at: float = 0.0
+        self._notifiers = notifiers or []
+        self._policy = policy
 
     def start(self) -> None:
         self._stop.clear()
@@ -68,6 +80,29 @@ class DetectionWorker:
                         self._last_dets = dets
                         self._last_annotated = annotated
                         self._last_at = time.time()
+                    # Evaluate notification policy outside lock
+                    if self._policy and self._notifiers:
+                        try:
+                            if self._policy.should_notify(dets, now=self._last_at):
+                                # Encode annotated frame for transport
+                                ok, buf = cv2.imencode(".jpg", annotated, [int(cv2.IMWRITE_JPEG_QUALITY), 80])
+                                img_bytes = buf.tobytes() if ok else None
+                                evt = NotificationEvent(
+                                    title="Detection Alert",
+                                    text=None,
+                                    detections=dets,
+                                    image_bytes=img_bytes,
+                                    timestamp=self._last_at,
+                                )
+                                for n in self._notifiers:
+                                    try:
+                                        n.send(evt)
+                                    except Exception:
+                                        # Ignore individual notifier failure to keep loop running
+                                        pass
+                        except Exception:
+                            # Don't let policy failure break the loop
+                            pass
             except Exception:
                 # Ignore transient errors; keep last good result
                 pass
@@ -79,4 +114,3 @@ class DetectionWorker:
             annotated = None if self._last_annotated is None else self._last_annotated.copy()
             at = self._last_at
         return dets, annotated, at
-

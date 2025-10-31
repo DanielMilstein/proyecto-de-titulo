@@ -46,6 +46,10 @@ También se mantiene compatibilidad con: `python src/services/cam_service.py`.
 ### Variables de entorno soportadas
 - `ML_API_BASE_URL` y `ML_API_TOKEN`: base URL y token para `ml_api`.
 - `PUBLIC_BASE`: URL pública desde la perspectiva de `ml_api` (por ejemplo `http://host.docker.internal:8080`).
+- Notificaciones (opcionales):
+  - `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`
+  - `HTTP_POST_URL`, `HTTP_POST_HEADERS_JSON`
+  - Política: `NOTIFY_ENABLED` (true/false), `NOTIFY_SCORE_THRESHOLD` (0..1), `NOTIFY_FRAMES_REQUIRED` (N), `NOTIFY_COOLDOWN_SECONDS` (segundos)
 
 Nota: el servicio intenta solicitar YUYV al dispositivo, pero expone y procesa frames en BGR mediante OpenCV.
 
@@ -68,3 +72,4 @@ Notas sobre cámara UVC dentro de Docker:
 Variables útiles en Compose:
 - `ML_API_BASE_URL=http://ml_api:3333` (acceso interno a ml_api)
 - `PUBLIC_BASE=http://camera_app:8080` (acceso interno desde ml_api al snapshot)
+- Variables de notificación opcionales también pueden definirse en `camera_app.environment`.

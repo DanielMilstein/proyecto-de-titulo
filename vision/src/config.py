@@ -34,3 +34,9 @@ class Config:
     http_post_url: Optional[str] = os.getenv("HTTP_POST_URL")
     # Optional JSON string of headers, e.g. '{"Authorization":"Bearer xyz"}'
     http_post_headers_json: Optional[str] = os.getenv("HTTP_POST_HEADERS_JSON")
+
+    # Notification policy
+    notify_enabled: bool = (os.getenv("NOTIFY_ENABLED", "true").lower() == "true")
+    notify_score_threshold: float = float(os.getenv("NOTIFY_SCORE_THRESHOLD", "0.6"))
+    notify_frames_required: int = int(os.getenv("NOTIFY_FRAMES_REQUIRED", "5"))
+    notify_cooldown_seconds: float = float(os.getenv("NOTIFY_COOLDOWN_SECONDS", "60"))
