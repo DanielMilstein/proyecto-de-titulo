@@ -20,3 +20,23 @@ services:
       retries: 3
     ports:
       - 3333:3333
+  camera_app:
+    hostname: camera_app
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: Dockerfile.cam
+    environment:
+      # Ensure ml_api and camera can reach each other inside the compose network
+      ML_API_BASE_URL: 'http://ml_api:3333'
+      PUBLIC_BASE: 'http://camera_app:8080'
+      # ML_API_TOKEN: ''  # Uncomment and set if ml_api enforces auth
+    depends_on:
+      - ml_api
+    tty: true
+    ports:
+      - 8080:8080
+    # For Linux hosts with a UVC camera, uncomment to pass the device
+    # devices:
+    #   - '/dev/video0:/dev/video0'
+    # privileged: true
