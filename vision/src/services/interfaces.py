@@ -30,3 +30,14 @@ class DetectionClient(Protocol):
     def health(self) -> bool: ...
     def detect_url(self, img_url: str) -> List[Detection]: ...
 
+
+class NotificationSender(Protocol):
+    def send(self, event: "NotificationEvent") -> None: ...
+
+
+class NotificationEvent(Protocol):
+    title: Optional[str]
+    text: Optional[str]
+    detections: List[Detection]
+    image_bytes: Optional[bytes]
+    timestamp: Optional[float]

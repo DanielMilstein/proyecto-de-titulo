@@ -28,3 +28,9 @@ class Config:
     host: str = "0.0.0.0"
     port: int = 8080
 
+    # Notifications (optional)
+    telegram_bot_token: Optional[str] = os.getenv("TELEGRAM_BOT_TOKEN")
+    telegram_chat_id: Optional[str] = os.getenv("TELEGRAM_CHAT_ID")
+    http_post_url: Optional[str] = os.getenv("HTTP_POST_URL")
+    # Optional JSON string of headers, e.g. '{"Authorization":"Bearer xyz"}'
+    http_post_headers_json: Optional[str] = os.getenv("HTTP_POST_HEADERS_JSON")
