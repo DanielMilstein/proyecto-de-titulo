@@ -1,4 +1,4 @@
-version: "1"
+version: "3.3"
 
 services:
   ml_api:
@@ -20,6 +20,8 @@ services:
       retries: 3
     ports:
       - 3333:3333
+
+
   camera_app:
     hostname: camera_app
     restart: unless-stopped
