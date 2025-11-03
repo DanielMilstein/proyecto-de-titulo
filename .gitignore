@@ -80,3 +80,5 @@ out/
 obico-server/
 imagenes/
 
+*.onnx
+*.engine

@@ -2,7 +2,8 @@
 
 # This will not use cuDNN because no headers included
 # should be compatible with Jetpack 4xx
-FROM nvcr.io/nvidia/l4t-tensorrt:r8.0.1-runtime as darknet_builder_jetson
+FROM nvcr.io/nvidia/l4t-tensorrt:r10.3.0-runtime AS darknet_builder_jetson
+
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt update && apt install -y ca-certificates build-essential gcc g++ cmake git
 WORKDIR /
@@ -14,10 +15,10 @@ RUN cd darknet \
   && sed -i 's/LIBSO=0/LIBSO=1/' Makefile \
   && make -j 4 && mv libdarknet.so libdarknet_cpu.so
 # compile GPU version
-RUN cd darknet \
-  && sed -i 's/GPU=0/GPU=1/' Makefile \
-  && sed -i 's/lcudart/lcudart_static -ldl -lrt/' Makefile \
-  && make -j 4 && mv libdarknet.so libdarknet_gpu.so
+# RUN cd darknet \
+#   && sed -i 's/GPU=0/GPU=1/' Makefile \
+#   && sed -i 's/lcudart/lcudart_static -ldl -lrt/' Makefile \
+#   && make -j 4 && mv libdarknet.so libdarknet_gpu.so
 
   # these options do not work in 8.0.1 unfortunately
   # && sed -i 's/CUDNN=0/CUDNN=1/' Makefile \
@@ -26,13 +27,16 @@ RUN cd darknet \
   # && sed -i 's/CUDNN_HALF=1/CUDNN_HALF=0/' Makefile \
 
 # Output image will not have darknet compilation layers to make it smaller
-FROM nvcr.io/nvidia/l4t-tensorrt:r8.0.1-runtime as ml_api_base_jetson
+FROM nvcr.io/nvidia/l4t-tensorrt:r10.3.0-runtime AS ml_api_base_jetson
 
 COPY --from=darknet_builder_jetson /darknet /darknet
 
+RUN apt update && apt install --no-install-recommends -y ca-certificates python3-pip wget
+RUN pip install --upgrade pip
+
 WORKDIR /
-RUN wget https://nvidia.box.com/shared/static/2sv2fv1wseihaw8ym0d4srz41dzljwxh.whl -O onnxruntime_gpu-1.11.0-cp38-none-any.whl
-RUN pip3 install onnxruntime_gpu-1.11.0-cp38-none-any.whl
+RUN wget https://nvidia.box.com/shared/static/2sv2fv1wseihaw8ym0d4srz41dzljwxh.whl -O onnxruntime_gpu-1.11.0-cp38-cp38-linux_aarch64.whl
+RUN pip install onnxruntime_gpu-1.11.0-cp38-cp38-linux_aarch64.whl
 
 # Some hacks to make darknet see cuda libraries. May fail easily
 # this is only needed for Jetpack 4x and will not be needed for Jetpack 5
@@ -41,8 +45,7 @@ ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/cuda/targets/aarch64-linux/li
 # May be unsafe to use such files, Todo: recompile onnx runtime
 
 WORKDIR /app
-RUN apt update && apt install --no-install-recommends -y ca-certificates python3-pip wget
-RUN pip install --upgrade pip
+
 RUN pip install opencv_python_headless
 
 ADD requirements.txt ./

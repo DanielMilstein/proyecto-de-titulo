@@ -26,10 +26,10 @@ fi
 # CPU + GPU image for amd64
 VERSION_BASE=${PREFIX}/ml_api_base:${VERSION}
 echo Building $VERSION_BASE
-docker build --platform linux/amd64 -f Dockerfile.base_amd64 -t ${VERSION_BASE}-linux-amd64 .
-docker push ${VERSION_BASE}-linux-amd64
+# docker build --platform linux/amd64 -f Dockerfile.base_amd64 -t ${VERSION_BASE}-linux-amd64 .
+# docker push ${VERSION_BASE}-linux-amd64
 # arm64(jetson)
 docker build --platform linux/arm64 -f Dockerfile.base_arm64 -t ${VERSION_BASE}-linux-arm64 .
 docker push ${VERSION_BASE}-linux-arm64
-docker manifest create ${INSECURE} ${VERSION_BASE} --amend ${VERSION_BASE}-linux-amd64 --amend ${VERSION_BASE}-linux-arm64
+docker manifest create ${INSECURE} ${VERSION_BASE} --amend ${VERSION_BASE}-linux-arm64
 docker manifest push ${INSECURE} ${VERSION_BASE}
