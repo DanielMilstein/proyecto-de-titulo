@@ -39,10 +39,15 @@ net_main = load_net(path.join(model_dir, 'model.cfg'), path.join(model_dir, 'mod
 def get_p():
     if 'img' in request.args:
         try:
-            resp = requests.get(request.args['img'], stream=True, timeout=(0.1, 5))
+            resp = requests.get(request.args['img'], stream=True, timeout=(2, 10))
             resp.raise_for_status()
             img_array = np.array(bytearray(resp.content), dtype=np.uint8)
             img = cv2.imdecode(img_array, -1)
+            if img is None:
+                raise ValueError("cv2 failed to decode image")
+            if not img.flags['C_CONTIGUOUS']:
+                app.logger.info("Decoded image not contiguous; copying to contiguous buffer")
+                img = np.ascontiguousarray(img)
             detections = detect(net_main, img, thresh=THRESH)
             return jsonify({'detections': detections})
         except Exception as err:

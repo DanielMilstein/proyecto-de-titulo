@@ -42,10 +42,10 @@ class TrtNet:
         h, w = target_hw
         resized = cv2.resize(image, (w, h), interpolation=cv2.INTER_LINEAR)
         img = cv2.cvtColor(resized, cv2.COLOR_BGR2RGB)
-        img = np.transpose(img, (2, 0, 1)).astype(np.float32)  # CHW
+        img = np.transpose(img, (2, 0, 1)).astype(np.float32, copy=False)  # CHW
         img = np.expand_dims(img, axis=0)  # NCHW
         img /= 255.0
-        return img
+        return np.ascontiguousarray(img)
 
     def detect(self, meta, image, alt_names, thresh=.5, hier_thresh=.5, nms=.45, debug=False):
         # Figure out input spatial size
@@ -195,4 +195,3 @@ def post_processing(output, width, height, conf_thresh, nms_thresh, names):
 
 
     return dets_batch
-
