@@ -1,12 +1,12 @@
 version: "3.3"
 
 services:
-  ml_api:
+  ml_api_trt:
     runtime: nvidia
-    hostname: ml_api
+    hostname: ml_api_trt
     restart: unless-stopped
     build:
-      context: ml_api
+      context: ml_api_trt
     environment:
       DEBUG: 'True'
       FLASK_APP: 'server.py'
@@ -14,7 +14,7 @@ services:
     tty: true
     command: bash -c "gunicorn --bind 0.0.0.0:3333 --workers 1 wsgi"
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider --no-check-certificate http://ml_api:3333/hc/"]
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider --no-check-certificate http://ml_api_trt:3333/hc/"]
       start_period: 30s
       interval: 30s
       timeout: 10s
@@ -31,11 +31,11 @@ services:
       dockerfile: Dockerfile.cam
     environment:
       # Ensure ml_api and camera can reach each other inside the compose network
-      ML_API_BASE_URL: 'http://ml_api:3333'
+      ML_API_BASE_URL: 'http://ml_api_trt:3333'
       PUBLIC_BASE: 'http://camera_app:8080'
       # ML_API_TOKEN: ''  # Uncomment and set if ml_api enforces auth
     depends_on:
-      - ml_api
+      - ml_api_trt
     tty: true
     ports:
       - 8080:8080
@@ -44,46 +44,3 @@ services:
       - '/dev/video0:/dev/video0'
     privileged: true
 
-
-  obico-ml-api:
-    hostname: ml_api
-    container_name: obico_ml_api
-    image: quay.io/kaszpir/ml_api:812a05b7-arm64
-    read_only: true
-    tty: true
-    # setting timeout to avoid queuing requests that will be dropped anyway
-    # command: bash -c "gunicorn --bind 0.0.0.0:3333 --workers 8 --timeout 60 wsgi"
-    command: bash -c "gunicorn --disable-redirect-access-to-syslog --error-logfile - --access-logfile - --bind 0.0.0.0:3333 --workers 1 --threads 8 --timeout 60 --statsd-host=statsd:9125 --statsd-prefix=service.ml_api wsgi"
-    ports:
-      - "3333:3333"
-    deploy:
-      resources:
-        limits:
-          cpus: '2'
-          memory: 1G
-        reservations:
-          cpus: '1'
-          memory: 32M
-    environment:
-      TZ: "UTC/Etc"
-      DEBUG: "True"
-      FLASK_APP: "server.py"
-      PYTHONDONTWRITEBYTECODE: "1"
-      # STATSD_HOST: "statsd-exporter.prometheus-statsd-exporter"
-      # STATSD_PORT: "9125"
-      # STATSD_PREFIX: "obico.ml_api"
-      TIMEOUT_CONNECT: "0.2"
-
-    volumes:
-      - type: tmpfs
-        target: /tmp
-        tmpfs:
-          size: 1G
-
-    restart: unless-stopped
-    healthcheck:
-      test: curl --fail http://localhost:3333/hc/ || exit 1
-      interval: 10s
-      retries: 2
-      start_period: 5s
-      timeout: 2s
