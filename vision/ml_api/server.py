@@ -39,7 +39,9 @@ net_main = load_net(path.join(model_dir, 'model.cfg'), path.join(model_dir, 'mod
 def get_p():
     if 'img' in request.args:
         try:
-            resp = requests.get(request.args['img'], stream=True, timeout=(0.1, 5))
+            img = request.args['img']
+            print(f"Received image URL: {img}")
+            resp = requests.get(request.args['img'], stream=True, timeout=(0.5, 15))
             resp.raise_for_status()
             img_array = np.array(bytearray(resp.content), dtype=np.uint8)
             img = cv2.imdecode(img_array, -1)

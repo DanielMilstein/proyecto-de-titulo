@@ -1,4 +1,4 @@
-FROM nvcr.io/nvidia/l4t-tensorrt:r10.3.0-runtime
+FROM nvcr.io/nvidia/l4t-tensorrt:r10.3.0-devel
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 	build-essential gcc g++ \
@@ -16,7 +16,12 @@ COPY lib /app/lib
 
 RUN pip install -r requirements.txt
 
-RUN CUDA_ROOT=/usr/local/cuda pip3 install --no-cache-dir pycuda
+# make sure CUDA is visible
+ENV CUDA_HOME=/usr/local/cuda
+ENV PATH=$CUDA_HOME/bin:$PATH
+ENV LD_LIBRARY_PATH=$CUDA_HOME/lib64:$LD_LIBRARY_PATH
+
+RUN pip3 install --no-cache-dir pycuda
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
