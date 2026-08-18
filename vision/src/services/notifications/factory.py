@@ -11,6 +11,7 @@ def create_notifiers_from_config(cfg: Config) -> List[NotificationSender]:
     notifiers: List[NotificationSender] = []
     if cfg.telegram_bot_token and cfg.telegram_chat_id:
         notifiers.append(TelegramNotifier(bot_token=cfg.telegram_bot_token, chat_id=str(cfg.telegram_chat_id)))
+        print("Created Telegram notifier")
     if cfg.http_post_url:
         headers = None
         if cfg.http_post_headers_json:

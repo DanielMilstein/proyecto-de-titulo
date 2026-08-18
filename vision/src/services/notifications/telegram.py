@@ -20,6 +20,7 @@ def _format_detections(dets: List[Detection], max_items: int = 10) -> str:
         lines.append(f"… and {len(dets) - max_items} more")
     return "\n".join(lines)
 
+id=449624288
 
 class TelegramNotifier(NotificationSender):
     """Sends notifications to a Telegram chat via Bot API.
@@ -47,6 +48,9 @@ class TelegramNotifier(NotificationSender):
 
     def send(self, event: NotificationEvent) -> None:
         text = self._compose_text(event)
+        print("Sending Telegram notification:")
+        print(text)
+
         if event.image_bytes:
             url = f"{self._base()}/sendPhoto"
             files = {"photo": ("frame.jpg", event.image_bytes, "image/jpeg")}

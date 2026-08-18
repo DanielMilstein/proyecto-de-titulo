@@ -7,3 +7,5 @@ sentry_sdk[flask]
 Flask-Compress
 uvicorn
 opencv-python
+python-telegram-bot==21.*
+python-dotenv

@@ -8,6 +8,9 @@ Reads environment variables and provides a typed configuration object.
 from dataclasses import dataclass
 import os
 from typing import Optional
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 @dataclass(frozen=True)
@@ -37,6 +40,6 @@ class Config:
 
     # Notification policy
     notify_enabled: bool = (os.getenv("NOTIFY_ENABLED", "true").lower() == "true")
-    notify_score_threshold: float = float(os.getenv("NOTIFY_SCORE_THRESHOLD", "0.6"))
+    notify_score_threshold: float = float(os.getenv("NOTIFY_SCORE_THRESHOLD", "0.3"))
     notify_frames_required: int = int(os.getenv("NOTIFY_FRAMES_REQUIRED", "5"))
     notify_cooldown_seconds: float = float(os.getenv("NOTIFY_COOLDOWN_SECONDS", "60"))
